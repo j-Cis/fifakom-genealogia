@@ -22,6 +22,7 @@ atty = "0.2.14"         # Sprawdza, czy program działa w prawdziwym terminalu (
 slint = "1.15.1"               # Główna biblioteka frameworka GUI Slint
 i-slint-backend-winit = "1.15.1" # Wewnętrzny backend Slinta oparty na Winit (obsługa okien i wejścia)
 winit = "0.30.13"              # Niskopoziomowa biblioteka do tworzenia okien (używana pod spodem przez Slinta)
+arboard = "3.6.1"
 
 # ZALEŻNOŚCI BUDOWANIA (Używane TYLKO przez plik build.rs przed główną kompilacją)
 [build-dependencies]

@@ -1,26 +1,44 @@
-env = { BIN_NAME = "${CARGO_MAKE_CRATE_NAME}" }
+[env]
+BIN_CLI = "CPSGen"
+BIN_GUI = "CPSGenGUI"
+
+# --- TASKS BUDOWANIA (Zależne od Cargo) ---
 
 [tasks.build-release]
 command = "cargo"
-args = ["build", "--release"]
+args = ["build", "--bins", "--release"]
 
 [tasks.build-debug]
 command = "cargo"
-args = ["build"]
+args = ["build", "--bins"]
 
-[tasks.copy-release]
-command = "powershell"
-args = ["-NoProfile", "-Command", "if (!(Test-Path 'dist\\win\\release')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\release' }; Copy-Item 'target\\release\\${BIN_NAME}.exe' 'dist\\win\\release\\' -Force"]
+# --- TASKS KOPIOWANIA (Samo kopiowanie) ---
 
-[tasks.copy-debug]
+[tasks.dist]
+description = "Kopiuje pliki binarne z target do dist bez ponownego buildu"
 command = "powershell"
-args = ["-NoProfile", "-Command", "if (!(Test-Path 'dist\\win\\debug')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\debug' }; Copy-Item 'target\\debug\\${BIN_NAME}.exe' 'dist\\win\\debug\\' -Force"]
+args = [
+    "-NoProfile", 
+    "-Command", 
+    "if (!(Test-Path 'dist\\win\\release')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\release' }; Copy-Item 'target\\release\\${BIN_CLI}.exe' 'dist\\win\\release\\' -Force; Copy-Item 'target\\release\\${BIN_GUI}.exe' 'dist\\win\\release\\' -Force; Write-Host 'Gotowe: Pliki skopiowane do dist\\win\\release'"
+]
+
+[tasks.dist-debug]
+description = "Kopiuje pliki debug z target do dist bez ponownego buildu"
+command = "powershell"
+args = [
+    "-NoProfile", 
+    "-Command", 
+    "if (!(Test-Path 'dist\\win\\debug')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\debug' }; Copy-Item 'target\\debug\\${BIN_CLI}.exe' 'dist\\win\\debug\\' -Force; Copy-Item 'target\\debug\\${BIN_GUI}.exe' 'dist\\win\\debug\\' -Force; Write-Host 'Gotowe: Pliki debug skopiowane do dist\\win\\debug'"
+]
+
+# --- FLOWS (Zależności) ---
 
 [tasks.release]
-dependencies = ["build-release", "copy-release"]
+dependencies = ["build-release", "dist"]
 
 [tasks.debug]
-dependencies = ["build-debug", "copy-debug"]
+dependencies = ["build-debug", "dist-debug"]
 
 [tasks.all]
 dependencies = ["release", "debug"]
