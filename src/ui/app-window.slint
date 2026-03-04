@@ -1,98 +1,80 @@
-import { Button, ScrollView } from "std-widgets.slint";
+import { Button, ScrollView, LineEdit } from "std-widgets.slint";
 
 export component AppWindow inherits Window {
     no-frame: true;
-    background: #1c1c1c;
-    preferred-width: 600px;
-    preferred-height: 800px;
+    background: transparent;
+    width: 500px;
+    height: 700px;
+    in-out property <[string]> results: ["KLIKNIJ I CIĄGNIJ GÓRĘ", "ABY PRZESUNĄĆ"];
+    callback quit();
+    callback send(string);
+    callback move_window(length, length); // Przywracamy, skoro działało!
 
-    in-out property <string> log-output: "OCZEKIWANIE NA GESTY...\n";
-    in-out property <int> counter: 0;
+    // Główny kontener - JAWNE POWIĄZANIE Z OKNEM
+    Rectangle {
+        width: root.width;
+        height: root.height;
+        background: #1c1c1c;
+        border-radius: 12px;
+        border-width: 2px;
+        border-color: #00ff00;
+        clip: true;
+        VerticalLayout {
+            // OBSZAR DO PRZESUWANIA (TitleBar zastępczy)
+            Rectangle {
+                height: 50px;
+                background: #333;
+                Text {
+                    text: "CHWYĆ MNIE (DRAG)";
+                    color: white;
+                }
 
-    callback close-requested();
-
-    VerticalLayout {
-        padding: 10px;
-        spacing: 10px;
-
-        Text { 
-            text: "REJESTRATOR SEKWENCJI"; 
-            font-size: 20px; 
-            color: white; 
-            horizontal-alignment: center;
-        }
-
-        // --- STREFA TESTOWA ---
-        Rectangle {
-            background: #333;
-            height: 150px;
-            border-radius: 10px;
-            border-width: 2px;
-            border-color: #555;
-
-            Text { text: "TU WYKONAJ GESTY"; color: #888; vertical-alignment: center; horizontal-alignment: center; }
-
-            TouchArea {
-                pointer-event(e) => {
-                    root.counter += 1;
-                    
-                    let prefix = "[" + root.counter + "] ";
-                    
-                    // Używamy operatora '?' zamiast 'if', żeby przypisać wartość OD RAZU
-                    let kind = 
-                        e.kind == PointerEventKind.down ? "DOWN" :
-                        e.kind == PointerEventKind.up ? "UP  " :
-                        e.kind == PointerEventKind.move ? "MOVE" : "CNCL";
-
-                    let btn = 
-                        e.button == PointerEventButton.left ? "Left" :
-                        e.button == PointerEventButton.right ? "Rght" :
-                        e.button == PointerEventButton.middle ? "Midl" : "None";
-
-                    let hov = self.has-hover ? "Hov:TAK" : "Hov:NIE";
-
-                    // Zapisujemy do właściwości (property), co jest dozwolone
-                    root.log-output = prefix + kind + " | Btn:" + btn + " | " + hov + "\n" + root.log-output;
+                TouchArea {
+                    pointer-event(event) => {
+                        if (event.kind == PointerEventKind.down && event.button == PointerEventButton.left) {
+                            root.move_window(0px, 0px); // Sygnał start_drag
+                        }
+                    }
                 }
             }
-        }
 
-        // --- OBSZAR LOGÓW ---
-        Text { text: "HISTORIA ZDARZEŃ:"; color: white; }
-        
-        Rectangle {
-            background: #111;
-            clip: true;
-            vertical-stretch: 1;
-            
-            Text {
-                x: 10px;
-                y: 10px;
-                text: root.log-output;
-                color: #00ff00;
-                font-family: "Courier New";
-                font-size: 14px;
-            }
-        }
+            VerticalLayout {
+                padding: 20px;
+                spacing: 15px;
+                input := LineEdit {
+                    placeholder-text: "Wzór...";
+                    height: 35px;
+                }
 
-        HorizontalLayout {
-            spacing: 10px;
-            height: 40px;
-            
-            Rectangle {
-                horizontal-stretch: 1;
-                background: #444;
-                border-radius: 5px;
-                Text { text: "WYCZYŚĆ LOGI"; color: white; vertical-alignment: center; horizontal-alignment: center; }
-                TouchArea { clicked => { root.log-output = ""; root.counter = 0; } }
-            }
+                Button {
+                    text: "GENERUJ";
+                    height: 40px;
+                    clicked => {
+                        root.send(input.text);
+                    }
+                }
 
-            Rectangle {
-                horizontal-stretch: 1;
-                background: #c42b1c;
-                border-radius: 5px;
-                Text { text: "ZAMKNIJ"; color: white; vertical-alignment: center; horizontal-alignment: center; }
-                TouchArea { clicked => { root.close-requested(); } }
+                Rectangle {
+                    background: #2d2d2d;
+                    vertical-stretch: 1;
+                    ScrollView {
+                        VerticalLayout {
+                            padding: 10px;
+                            for res in root.results: Text {
+                                text: res;
+                                color: #00ff00;
+                            }
+                        }
+                    }
+                }
+
+                // Przycisk wyjścia
+                Button {
+                    text: "ZAMKNIJ";
+                    clicked => {
+                        root.quit();
+                    }
+                }
             }
         }
     }
