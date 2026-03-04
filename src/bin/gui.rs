@@ -12,7 +12,6 @@ fn main() -> Result<()> {
         let _ = slint::quit_event_loop();
     });
 
-    // Skoro to działało, zostawiamy bez zmian
     let app_weak_move = app.as_weak();
     app.on_move_window(move |dx, dy| {
         if let Some(ui) = app_weak_move.upgrade() {
@@ -28,8 +27,16 @@ fn main() -> Result<()> {
     app.on_send(move |pattern| {
         let ui = app_weak_send.unwrap();
         let results = generate_morphology(pattern.as_str());
-        let model: Vec<SharedString> = results.into_iter().map(SharedString::from).collect();
+        
+        // 1. Aktualizacja widoku listy
+        let model: Vec<SharedString> = results.iter().map(|s| SharedString::from(s)).collect();
         ui.set_results(ModelRc::new(VecModel::from(model)));
+
+        // 2. Naprawa: Wysłanie połączonego tekstu do GUI
+        let joined = results.join(", ");
+        ui.set_joined_text(SharedString::from(joined));
+        
+        println!("Wygenerowano {} wyników", results.len());
     });
 
     app.run()?;

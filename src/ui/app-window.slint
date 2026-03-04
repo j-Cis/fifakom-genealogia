@@ -5,34 +5,34 @@ export component AppWindow inherits Window {
     background: transparent;
     width: 500px;
     height: 700px;
-    in-out property <[string]> results: ["KLIKNIJ I CIĄGNIJ GÓRĘ", "ABY PRZESUNĄĆ"];
+    in-out property <[string]> results: [];
+    in-out property <string> joined_text: ""; // Odbiornik dla tekstu z przecinkami
+    in-out property <bool> show_as_list: true;
     callback quit();
     callback send(string);
-    callback move_window(length, length); // Przywracamy, skoro działało!
-
-    // Główny kontener - JAWNE POWIĄZANIE Z OKNEM
+    callback move_window(length, length);
     Rectangle {
-        width: root.width;
-        height: root.height;
+        width: 100%;
+        height: 100%;
         background: #1c1c1c;
         border-radius: 12px;
         border-width: 2px;
         border-color: #00ff00;
         clip: true;
         VerticalLayout {
-            // OBSZAR DO PRZESUWANIA (TitleBar zastępczy)
+            // Pasek Drag
             Rectangle {
                 height: 50px;
                 background: #333;
                 Text {
-                    text: "CHWYĆ MNIE (DRAG)";
+                    text: "CPSGen - WYBÓR FORMATU";
                     color: white;
                 }
 
                 TouchArea {
                     pointer-event(event) => {
                         if (event.kind == PointerEventKind.down && event.button == PointerEventButton.left) {
-                            root.move_window(0px, 0px); // Sygnał start_drag
+                            root.move_window(0px, 0px);
                         }
                     }
                 }
@@ -41,14 +41,39 @@ export component AppWindow inherits Window {
             VerticalLayout {
                 padding: 20px;
                 spacing: 15px;
+                alignment: start;
                 input := LineEdit {
                     placeholder-text: "Wzór...";
                     height: 35px;
+                    accepted => {
+                        root.send(self.text);
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+                    height: 35px;
+                    Button {
+                        text: "WIDOK LISTY";
+                        enabled: !root.show_as_list;
+                        clicked => {
+                            root.show_as_list = true;
+                        }
+                    }
+
+                    Button {
+                        text: "WIDOK TEKSTU";
+                        enabled: root.show_as_list;
+                        clicked => {
+                            root.show_as_list = false;
+                        }
+                    }
                 }
 
                 Button {
                     text: "GENERUJ";
                     height: 40px;
+                    primary: true;
                     clicked => {
                         root.send(input.text);
                     }
@@ -57,18 +82,29 @@ export component AppWindow inherits Window {
                 Rectangle {
                     background: #2d2d2d;
                     vertical-stretch: 1;
+                    clip: true;
                     ScrollView {
-                        VerticalLayout {
+                        viewport-width: self.width;
+                        if (root.show_as_list): VerticalLayout {
                             padding: 10px;
+                            spacing: 5px;
+                            alignment: start;
                             for res in root.results: Text {
                                 text: res;
                                 color: #00ff00;
                             }
                         }
+                        if (!root.show_as_list): VerticalLayout {
+                            padding: 10px;
+                            Text {
+                                text: root.joined_text;
+                                color: #00ff00;
+                                wrap: word-wrap;
+                            }
+                        }
                     }
                 }
 
-                // Przycisk wyjścia
                 Button {
                     text: "ZAMKNIJ";
                     clicked => {
