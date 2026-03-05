@@ -1,20 +1,27 @@
 # [fifakom-genealogia](https://github.com/j-Cis/fifakom-genealogia/releases) **„Genealogia dla sprytnych”**
-## CPSGen (Cartesian Product Segment Generator)
 
-Narzędzie do generowania kombinacji tekstowych na podstawie wzorców wykorzystujących iloczyn kartezjański. Idealne do tworzenia list słów, testowania morfologii lub generowania wariantów haseł/nazw.
+Zestaw narzędzi i sztuczek pomocnych genealogom.
 
-## 🚀 Funkcje
+| № | Nazwa GUI | Nazwa CLI | OS | Cel |
+| --- | :--- | :--- | :---: | :--- |
+| 1. | GenProdKart | gen_pk | Win(x64) | **Iloczyn Kartezjański/Generator Kombinacji** Narzędzie do generowania kombinacji tekstowych na podstawie wzorców wykorzystujących iloczyn kartezjański. <br> Idealne do genrowania wariantów nazwisk. `(Zg \| Sg \| Zk \| Sk)  o (d \| ds \| dz \| c \| cz) (a \| ai \| ay \| aÿ \| aj \| aij \| e \| ei \| ey \| eÿ \| ej \| eij)` |
 
-- **Dwa tryby pracy**: Szybka konsola (CLI) oraz nowoczesny interfejs graficzny (GUI).
-- **Zaawansowane wzorce**: Obsługa opcji typu `(a|b|c)` do generowania wszystkich możliwych kombinacji.
-- **Tryby widoku (GUI)**: Możliwość wyświetlania wyników jako listy lub ciągłego tekstu.
-- **Kopiowanie do schowka**: Szybki eksport wyników jednym kliknięciem.
-- **Tryb Jasny/Ciemny**: Automatyczne dostosowanie do preferencji systemowych lub ręczna zmiana.
-- **Brak okna konsoli**: Wersja GUI działa jako czysta aplikacja Windows.
+Gotowe 📦 pliki `.exe` znajdą się w folderze `./dist/win/release/`.
 
-## 🛠 Instalacja i Budowanie
+## NARZĘDZIA
+
+### CPSGen 
+
+## 🛠 Samodzielna kompilacja (do korekty - nie aktyualne)
 
 Projekt został napisany w języku Rust przy użyciu frameworka Slint.
+
+Aby zbudować obie wersje (CLI i GUI) w trybie optymalizowanym:
+
+```bash
+cargo make release
+
+```
 
 ### Wymagania
 
@@ -26,16 +33,7 @@ Projekt został napisany w języku Rust przy użyciu frameworka Slint.
 
   ```
 
-### Kompilacja
 
-Aby zbudować obie wersje (CLI i GUI) w trybie optymalizowanym:
-
-```bash
-cargo make release
-
-```
-
-Gotowe pliki `.exe` znajdą się w folderze `dist/win/release/`.
 
 ## 📂 Struktura dystrybucji (dist)
 
@@ -72,13 +70,6 @@ Uruchom program z terminala, podając wzór jako argument:
 
 ```
 
-## 📂 Struktura Projektu
-
-- `src/lib.rs` - Rdzeń logiczny generatora.
-- `src/bin/gui.rs` - Kod źródłowy aplikacji graficznej.
-- `src/bin/main.rs` - Kod źródłowy narzędzia konsolowego.
-- `src/ui/` - Pliki interfejsu użytkownika `.slint` oraz style.
-- `Makefile.toml` - Konfiguracja automatyzacji budowania i dystrybucji.
 
 ## ⚖ Licencja
 

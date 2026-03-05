@@ -1,44 +1,67 @@
-[env]
-BIN_CLI = "CPSGen"
-BIN_GUI = "CPSGenGUI"
+# Komenda              | Co robi?                                     | Gdzie szukać pliku?
+# ---------------------|----------------------------------------------|-------------------
+# cargo make r [nazwa] | Buduje i kopiuje JEDNĄ wersję finalną        | dist/win/release/
+# cargo make r-all     | Buduje i kopiuje WSZYSTKIE wersje finalne    | dist/win/release/
+# cargo make d [nazwa] | Buduje i kopiuje JEDNĄ wersję testową        | dist/win/debug/
+# cargo make d-all     | Buduje i kopiuje WSZYSTKIE wersje testowe    | dist/win/debug/
+# cargo make dist-r    | Tylko kopiuje to, co już zbudowane (Release) | dist/win/release/
+# cargo make dist-d    | Tylko kopiuje to, co już zbudowane (Debug)   | dist/win/debug/
 
-# --- TASKS BUDOWANIA (Zależne od Cargo) ---
 
-[tasks.build-release]
+# --- TASKS KOPIOWANIA (Dynamiczne) ---
+
+[tasks.dist-r]
+description = "Kopiuje pliki .exe z target/release do dist"
+command = "powershell"
+args = [
+    "-NoProfile", 
+    "-Command", 
+    '''
+    $sourceDir = "target\\release";
+    $targetDir = "dist\\win\\release";
+    if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Force -Path $targetDir };
+    Get-ChildItem -Path $sourceDir -Filter *.exe | ForEach-Object { Copy-Item $_.FullName "$targetDir\\" -Force; Write-Host "Skopiowano: $($_.Name)" }
+    '''
+]
+
+[tasks.dist-d]
+description = "Kopiuje pliki .exe z target/debug do dist"
+command = "powershell"
+args = [
+    "-NoProfile", 
+    "-Command", 
+    '''
+    $sourceDir = "target\\debug";
+    $targetDir = "dist\\win\\debug";
+    if (!(Test-Path $targetDir)) { New-Item -ItemType Directory -Force -Path $targetDir };
+    Get-ChildItem -Path $sourceDir -Filter *.exe | ForEach-Object { Copy-Item $_.FullName "$targetDir\\" -Force; Write-Host "Skopiowano (debug): $($_.Name)" }
+    '''
+]
+
+# --- SZYBKIE BUDOWANIE (r = release, d = debug) ---
+
+[tasks.r]
+description = "Buduje jedną binarkę (release) i kopiuje"
+command = "cargo"
+args = ["build", "--release", "--bin", "${@}"]
+run_task = "dist-r"
+
+[tasks.d]
+description = "Buduje jedną binarkę (debug) i kopiuje"
+command = "cargo"
+args = ["build", "--bin", "${@}"]
+run_task = "dist-d"
+
+# --- ZBIORCZE BUDOWANIE WSZYSTKIEGO (all) ---
+
+[tasks.r-all]
+description = "Buduje wszystkie binarki (release) i kopiuje"
 command = "cargo"
 args = ["build", "--bins", "--release"]
+run_task = "dist-r"
 
-[tasks.build-debug]
+[tasks.d-all]
+description = "Buduje wszystkie binarki (debug) i kopiuje"
 command = "cargo"
 args = ["build", "--bins"]
-
-# --- TASKS KOPIOWANIA (Samo kopiowanie) ---
-
-[tasks.dist]
-description = "Kopiuje pliki binarne z target do dist bez ponownego buildu"
-command = "powershell"
-args = [
-    "-NoProfile", 
-    "-Command", 
-    "if (!(Test-Path 'dist\\win\\release')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\release' }; Copy-Item 'target\\release\\${BIN_CLI}.exe' 'dist\\win\\release\\' -Force; Copy-Item 'target\\release\\${BIN_GUI}.exe' 'dist\\win\\release\\' -Force; Write-Host 'Gotowe: Pliki skopiowane do dist\\win\\release'"
-]
-
-[tasks.dist-debug]
-description = "Kopiuje pliki debug z target do dist bez ponownego buildu"
-command = "powershell"
-args = [
-    "-NoProfile", 
-    "-Command", 
-    "if (!(Test-Path 'dist\\win\\debug')) { New-Item -ItemType Directory -Force -Path 'dist\\win\\debug' }; Copy-Item 'target\\debug\\${BIN_CLI}.exe' 'dist\\win\\debug\\' -Force; Copy-Item 'target\\debug\\${BIN_GUI}.exe' 'dist\\win\\debug\\' -Force; Write-Host 'Gotowe: Pliki debug skopiowane do dist\\win\\debug'"
-]
-
-# --- FLOWS (Zależności) ---
-
-[tasks.release]
-dependencies = ["build-release", "dist"]
-
-[tasks.debug]
-dependencies = ["build-debug", "dist-debug"]
-
-[tasks.all]
-dependencies = ["release", "debug"]
+run_task = "dist-d"

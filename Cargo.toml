@@ -1,9 +1,16 @@
 [package]
-name = "cartesian-product-segment-generator"
-version = "0.1.3"
+name = "fifakom-genealogia"
+version = "0.1.4"
+readme = "README.md"
+repository = "https://github.com/j-Cis/fifakom-genealogia"
+description = "Zestaw narzędzi i sztuczek pomocnych zaawansowanym genealogom."
+authors = ["Jan Roman Cisowski „Gepiden”"]
 edition = "2024"       # Używana edycja języka Rust (nowoczesne funkcje i resolver)
 rust-version = "1.93.1" # Minimalna wersja kompilatora wymagana do zbudowania projektu
 resolver = "3"         # Sposób, w jaki Cargo rozwiązuje zależności (3 to standard dla edycji 2024)
+
+# [package.metadata.cargo]
+# edition = "2024"
 
 # ZALEŻNOŚCI GŁÓWNE (Kompilowane do końcowego programu)
 [dependencies]
@@ -22,7 +29,7 @@ atty = "0.2.14"         # Sprawdza, czy program działa w prawdziwym terminalu (
 slint = "1.15.1"               # Główna biblioteka frameworka GUI Slint
 i-slint-backend-winit = "1.15.1" # Wewnętrzny backend Slinta oparty na Winit (obsługa okien i wejścia)
 winit = "0.30.13"              # Niskopoziomowa biblioteka do tworzenia okien (używana pod spodem przez Slinta)
-arboard = "3.6.1"
+arboard = "3.6.1"               # Biblioteka do obsługi schowka (kopiowanie wyników do schowka)
 
 # ZALEŻNOŚCI BUDOWANIA (Używane TYLKO przez plik build.rs przed główną kompilacją)
 [build-dependencies]
@@ -35,9 +42,9 @@ path = "src/lib/mod.rs" # Wskazuje, gdzie znajduje się główny plik biblioteki
 
 # KONFIGURACJA PLIKÓW WYKONYWALNYCH (Możesz mieć wiele programów w jednym projekcie)
 [[bin]]
-name = "CPSGen"         # Nazwa wynikowego pliku dla wersji w konsoli (np. CPSGen.exe na Windows)
-path = "src/bin/cli.rs" # Kod źródłowy dla wersji CLI
+name = "gen_pk"         # Nazwa wynikowego pliku dla wersji w konsoli (np. CPSGen.exe na Windows)
+path = "src/bin/genpk_cli.rs" # Kod źródłowy dla wersji CLI
 
 [[bin]]
-name = "CPSGenGUI"      # Nazwa wynikowego pliku dla wersji okienkowej (np. CPSGenGUI.exe)
-path = "src/bin/gui.rs" # Kod źródłowy dla wersji GUI
+name = "GenProdKart"      # Nazwa wynikowego pliku dla wersji okienkowej (np. CPSGenGUI.exe)
+path = "src/bin/genpk_gui.rs" # Kod źródłowy dla wersji GUI
