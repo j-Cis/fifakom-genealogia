@@ -4,7 +4,7 @@ use std::fs;
 
 // Importujemy nasze modele i parser zakresu z sąsiednich plików
 use super::modele::{Miejsce, Rekord, Roczniki};
-use super::parser_zakresu::rozkoduj_lata;
+use super::parser_rocznikow::rozkoduj_lata;
 
 /// Główna funkcja czytająca plik KML i zapisująca wynik do JSON
 pub fn parsuj_do_json(sciezka_kml: &str, sciezka_json: &str) -> Result<()> {

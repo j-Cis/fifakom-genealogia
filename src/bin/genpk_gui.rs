@@ -3,14 +3,14 @@
 use anyhow::Result;
 use arboard::Clipboard;
 // DODANO: Model - bez tego metody row_count() i row_data() nie działają
-use cpsgen_lib::logic::morphology::generate_morphology;
-use cpsgen_lib::window;
+use fifak_lib::logic::morphology::generate_morphology;
+use fifak_lib::window;
 use slint::{Model, ModelRc, SharedString, VecModel};
 
 slint::include_modules!();
 
 fn main() -> Result<()> {
-    let app = AppWindow::new()?;
+    let app = GenPkWindow::new()?;
 
     // 1. Zamykanie aplikacji
     app.on_quit(move || {

@@ -9,59 +9,59 @@ edition = "2024"       # Używana edycja języka Rust (nowoczesne funkcje i reso
 rust-version = "1.93.1" # Minimalna wersja kompilatora wymagana do zbudowania projektu
 resolver = "3"         # Sposób, w jaki Cargo rozwiązuje zależności (3 to standard dla edycji 2024)
 
-# [package.metadata.cargo]
-# edition = "2024"
-
 # ZALEŻNOŚCI GŁÓWNE (Kompilowane do końcowego programu)
 [dependencies]
 # --- Narzędzia ogólne i obsługa błędów ---
 anyhow = "1.0.102"      # Prosta i elastyczna obsługa błędów (typ anyhow::Result)
-itertools = "0.14.0"    # Dodatkowe, potężne metody dla iteratorów (często używane przy generowaniu kombinacji/kartezjańskich)
+itertools = "0.14.0"    # Dodatkowe, potężne metody dla iteratorów (często używane przy kombinacjach/kartezjańskich)
 regex = "1.12.3"        # Obsługa wyrażeń regularnych do analizy i formatowania tekstu
+chrono = "0.4.44"       # Obsługa dat i czasu (używane np. do dodawania daty do nazw pobieranych plików)
 
 # --- Interfejs Linii Poleceń (CLI) ---
 clap = { version = "4.5.60", features = ["derive"] } # Potężny parser argumentów z wiersza poleceń
-inquire = "0.9.4"       # Biblioteka do tworzenia interaktywnych promptów/menu w terminalu (pytania, listy wyboru)
-colored = "3.1.1"       # Kolorowanie tekstu w konsoli (żeby komunikaty ładnie wyglądały)
+inquire = "0.9.4"       # Interaktywne prompty/menu w terminalu (pytania, listy wyboru)
+colored = "3.1.1"       # Kolorowanie tekstu w konsoli (żeby komunikaty wyróżniały się wizualnie)
 atty = "0.2.14"         # Sprawdza, czy program działa w prawdziwym terminalu (uwaga: w nowym Rust można użyć std::io::IsTerminal)
 
 # --- Graficzny Interfejs Użytkownika (GUI) ---
 slint = "1.15.1"               # Główna biblioteka frameworka GUI Slint
 i-slint-backend-winit = "1.15.1" # Wewnętrzny backend Slinta oparty na Winit (obsługa okien i wejścia)
 winit = "0.30.13"              # Niskopoziomowa biblioteka do tworzenia okien (używana pod spodem przez Slinta)
-arboard = "3.6.1"               # Biblioteka do obsługi schowka (kopiowanie wyników do schowka)
+arboard = "3.6.1"              # Biblioteka do obsługi schowka (np. kopiowanie wyników działania programu)
 
-# pobieranie KML GENETEKI
-reqwest = "0.13.2"
-chrono = "0.4.44"
-tokio = { version = "1.50.0", features = ["rt-multi-thread", "macros"] }
-serde = { version = "1.0.228", features = ["derive"] }
-serde_json = "1.0.149"
-roxmltree = "0.21.1"
-url = "2.5.8"
+# --- Sieć i Asynchroniczność (Pobieranie danych z Geneteki) ---
+tokio = { version = "1.50.0", features = ["rt-multi-thread", "macros"] } # Środowisko asynchroniczne niezbędne do działania reqwest
+reqwest = "0.13.2"      # Klient HTTP do pobierania plików KML (Google Maps) i stron HTML (Geneteka)
+url = "2.5.8"           # Biblioteka do łatwej analizy i wyciągania parametrów z linków (np. rid i w)
+
+# --- Przetwarzanie i Serializacja Danych (XML, HTML, JSON) ---
+serde = { version = "1.0.228", features = ["derive"] } # Potężny framework do definiowania struktur danych (Serialize/Deserialize)
+serde_json = "1.0.149"  # Narzędzie do konwersji naszych struktur w Rusta na pliki JSON i odwrotnie
+roxmltree = "0.21.1"    # Ultraszybki parser drzewa XML – używany do czytania tagów z map KML
+scraper = "0.25.0"      # Parser HTML z obsługą selektorów CSS (wyciąganie danych prosto z tabel na stronie WWW)
 
 # ZALEŻNOŚCI BUDOWANIA (Używane TYLKO przez plik build.rs przed główną kompilacją)
 [build-dependencies]
 slint-build = "1.15.1"  # Kompilator Slinta: tłumaczy pliki .slint na kod Rusta podczas etapu budowania
 
-# KONFIGURACJA BIBLIOTEKI (Jeśli Twój kod jest też używany jako biblioteka)
+# KONFIGURACJA BIBLIOTEKI
 [lib]
-name = "cpsgen_lib"
-path = "src/lib/mod.rs" # Wskazuje, gdzie znajduje się główny plik biblioteki
+name = "fifak_lib"
+path = "src/lib/mod.rs" # Wskazuje, gdzie znajduje się główne "jądro" Twojej aplikacji (biblioteka wewnętrzna)
 
-# KONFIGURACJA PLIKÓW WYKONYWALNYCH (Możesz mieć wiele programów w jednym projekcie)
+# KONFIGURACJA PLIKÓW WYKONYWALNYCH (Pojedyncze programy bazujące na fifak_lib)
 [[bin]]
-name = "gen_pk"         # Nazwa wynikowego pliku dla wersji w konsoli (np. CPSGen.exe na Windows)
-path = "src/bin/genpk_cli.rs" # Kod źródłowy dla wersji CLI
-
-[[bin]]
-name = "GenProdKart"      # Nazwa wynikowego pliku dla wersji okienkowej (np. CPSGenGUI.exe)
-path = "src/bin/genpk_gui.rs" # Kod źródłowy dla wersji GUI
+name = "gen_pk"                     # Generator Produkcji Kart (Konsola)
+path = "src/bin/genpk_cli.rs" 
 
 [[bin]]
-name = "geneteka_zakres"        # CLI (konsola)
-path = "src/bin/geneteka_zakres_cli.rs"
+name = "GenProdKart"                # Generator Produkcji Kart (GUI)
+path = "src/bin/genpk_gui.rs" 
 
-## [[bin]]
-## name = "GenetekaZakres"         # GUI (okno)
-## path = "src/bin/geneteka_zakres_gui.rs"
+[[bin]]
+name = "GenetekaPobierzZakresMapa"  # Pobieracz KML z Google Maps (Konsola)
+path = "src/bin/geneteka_zakres_mapa_cli.rs"
+
+[[bin]]
+name = "GenetekaPobierzZakresHtml"  # Pobieracz rejestrów HTML z Geneteki (Konsola)
+path = "src/bin/geneteka_zakres_html_cli.rs"

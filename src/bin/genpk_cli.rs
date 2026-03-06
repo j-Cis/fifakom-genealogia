@@ -1,9 +1,9 @@
 use clap::{Parser, Subcommand};
 
-use cpsgen_lib::cli::menu::run_menu;
-use cpsgen_lib::logic::format::OutputFormat;
-use cpsgen_lib::logic::format::format_result;
-use cpsgen_lib::logic::morphology::generate_morphology;
+use fifak_lib::cli::menu::run_menu;
+use fifak_lib::logic::format::OutputFormat;
+use fifak_lib::logic::format::format_result;
+use fifak_lib::logic::morphology::generate_morphology;
 
 /// CLI i menu interaktywne w jednym pliku
 #[derive(Parser)]

@@ -1,0 +1,186 @@
+import { ScrollView, LineEdit } from "std-widgets.slint";
+import { Palette } from "theme/globals.slint";
+
+// WŁASNY PRZYCISK - 100% KONTROLI I ZERO BŁĘDÓW DZIEDZICZENIA
+component CustomBtn {
+    in property <string> text;
+    in property <bool> enabled: true;
+    in property <bool> primary: false;
+    // Nie deklarujemy 'width' ani 'height' tutaj, bo są wbudowane
+    callback clicked;
+    Rectangle {
+        // Tło reaguje na najechanie myszką i tryb primary
+        background: root.primary ? #00a2ff : (ta.has-hover ? Palette.hover-background : (root.enabled ? Palette.background-light : Palette.background));
+        border-width: 1px;
+        border-color: Palette.border;
+        border-radius: 4px;
+        // Używamy root.height/width które Slint daje nam za darmo
+        height: 100%;
+        width: 100%;
+        Text {
+            text: root.text;
+            // Tutaj naprawiamy widoczność tekstu w trybie jasnym
+            color: !root.enabled ? Palette.text-secondary : (root.primary ? white : Palette.text-primary);
+            font-weight: 700;
+            vertical-alignment: center;
+            horizontal-alignment: center;
+        }
+
+        ta := TouchArea {
+            enabled: root.enabled;
+            clicked => {
+                root.clicked();
+            }
+            mouse-cursor: self.has-hover ? pointer : default;
+        }
+    }
+}
+
+export component GenPkWindow inherits Window {
+    no-frame: true;
+    background: transparent;
+    width: 500px;
+    height: 700px;
+    in-out property <[string]> results: [];
+    in-out property <string> joined_text: "";
+    in-out property <bool> show_as_list: true;
+    callback quit();
+    callback send(string);
+    callback move_window(length, length);
+    callback copy_to_clipboard(string); // string powie nam, czy kopiujemy listę czy tekst
+    Rectangle {
+        width: 100%;
+        height: 100%;
+        background: Palette.background;
+        border-radius: 12px;
+        border-width: 2px;
+        border-color: Palette.accent-success;
+        clip: true;
+        VerticalLayout {
+            // PASEK TYTUŁU
+            Rectangle {
+                height: 50px;
+                background: Palette.title-bar-background;
+                TouchArea {
+                    width: 100%;
+                    height: 100%;
+                    pointer-event(event) => {
+                        if (event.kind == PointerEventKind.down && event.button == PointerEventButton.left) {
+                            root.move_window(0px, 0px);
+                        }
+                    }
+                }
+
+                HorizontalLayout {
+                    padding-left: 15px;
+                    padding-right: 15px;
+                    spacing: 10px;
+                    Text {
+                        text: "CPSGen - FORMATOWANIE";
+                        color: Palette.text-primary;
+                        vertical-alignment: center;
+                    }
+
+                    Rectangle {
+                        horizontal-stretch: 1;
+                    }
+
+                    CustomBtn {
+                        text: Palette.is-dark ? "☀️" : "🌙";
+                        width: 40px;
+                        height: 35px;
+                        clicked => {
+                            Palette.is-dark = !Palette.is-dark;
+                        }
+                    }
+                }
+            }
+
+            VerticalLayout {
+                padding: 20px;
+                spacing: 15px;
+                alignment: start;
+                input := LineEdit {
+                    placeholder-text: "Wzór...";
+                    height: 35px;
+                    accepted => {
+                        root.send(self.text);
+                    }
+                }
+
+                HorizontalLayout {
+                    spacing: 10px;
+                    height: 35px;
+                    CustomBtn {
+                        text: "LISTA";
+                        enabled: !root.show_as_list;
+                        horizontal-stretch: 1;
+                        clicked => {
+                            root.show_as_list = true;
+                        }
+                    }
+
+                    CustomBtn {
+                        text: "TEKST";
+                        enabled: root.show_as_list;
+                        horizontal-stretch: 1;
+                        clicked => {
+                            root.show_as_list = false;
+                        }
+                    }
+                }
+
+                CustomBtn {
+                    text: "GENERUJ";
+                    height: 40px;
+                    primary: true;
+                    clicked => {
+                        root.send(input.text);
+                    }
+                }
+
+                CustomBtn {
+                    text: "KOPIUJ WYNIKI";
+                    primary: false;
+                    clicked => {
+                        root.copy_to_clipboard(root.show_as_list ? "list" : "text");
+                    }
+                }
+
+                Rectangle {
+                    background: Palette.background-light;
+                    border-radius: 4px;
+                    vertical-stretch: 1;
+                    clip: true;
+                    ScrollView {
+                        viewport-width: self.width;
+                        if (root.show_as_list): VerticalLayout {
+                            padding: 10px;
+                            spacing: 5px;
+                            for res in root.results: Text {
+                                text: res;
+                                color: Palette.accent-success;
+                            }
+                        }
+                        if (!root.show_as_list): VerticalLayout {
+                            padding: 10px;
+                            Text {
+                                text: root.joined_text;
+                                color: Palette.accent-success;
+                                wrap: word-wrap;
+                            }
+                        }
+                    }
+                }
+
+                CustomBtn {
+                    text: "ZAMKNIJ";
+                    height: 45px;
+                    clicked => {
+                        root.quit();
+                    }
+                }
+            }
+        }
+    }
+}
