@@ -31,6 +31,15 @@ i-slint-backend-winit = "1.15.1" # Wewnętrzny backend Slinta oparty na Winit (o
 winit = "0.30.13"              # Niskopoziomowa biblioteka do tworzenia okien (używana pod spodem przez Slinta)
 arboard = "3.6.1"               # Biblioteka do obsługi schowka (kopiowanie wyników do schowka)
 
+# pobieranie KML GENETEKI
+reqwest = "0.13.2"
+chrono = "0.4.44"
+tokio = { version = "1.50.0", features = ["rt-multi-thread", "macros"] }
+serde = { version = "1.0.228", features = ["derive"] }
+serde_json = "1.0.149"
+roxmltree = "0.21.1"
+url = "2.5.8"
+
 # ZALEŻNOŚCI BUDOWANIA (Używane TYLKO przez plik build.rs przed główną kompilacją)
 [build-dependencies]
 slint-build = "1.15.1"  # Kompilator Slinta: tłumaczy pliki .slint na kod Rusta podczas etapu budowania
@@ -48,3 +57,11 @@ path = "src/bin/genpk_cli.rs" # Kod źródłowy dla wersji CLI
 [[bin]]
 name = "GenProdKart"      # Nazwa wynikowego pliku dla wersji okienkowej (np. CPSGenGUI.exe)
 path = "src/bin/genpk_gui.rs" # Kod źródłowy dla wersji GUI
+
+[[bin]]
+name = "geneteka_zakres"        # CLI (konsola)
+path = "src/bin/geneteka_zakres_cli.rs"
+
+## [[bin]]
+## name = "GenetekaZakres"         # GUI (okno)
+## path = "src/bin/geneteka_zakres_gui.rs"
