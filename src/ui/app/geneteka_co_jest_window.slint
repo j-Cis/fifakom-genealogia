@@ -5,8 +5,8 @@ import { LineEdit, ScrollView } from "std-widgets.slint";
 export component GenetekaCoJestWindow inherits Window {
     no-frame: true;
     background: transparent;
-    width: 600px;
-    height: 800px;
+    preferred-width: 600px;
+    preferred-height: 800px;
     
     // Callbacks dla Rusta
     callback quit();
@@ -20,7 +20,7 @@ export component GenetekaCoJestWindow inherits Window {
         window-move(dx, dy) => {
             root.window_move(dx, dy);
         }
-        window_resize(dir) => {
+        window-resize(dir) => {
             root.window_resize(dir);
         }
         

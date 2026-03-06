@@ -50,6 +50,7 @@ pub fn window_resize(window: &Window, direction: SharedString) {
             "sw" => ResizeDirection::SouthWest,
             _ => return, // Nieznany kierunek - ignorujemy
         };
+        let _ = winit_window.drag_resize_window(dir);
 
         if let Err(e) = winit_window.drag_resize_window(dir) {
             eprintln!("Resize error: {}", e);
