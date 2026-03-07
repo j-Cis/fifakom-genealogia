@@ -1,75 +1,58 @@
 import { Palette } from "../theme/globals.slint";
-import { WindowShell, CustomBtn } from "../components/window-shell.slint";
+import {
+    WindowShell,
+    WindowCtrl,
+    CustomBtn,
+} from "../components/window-shell.slint";
 import { LineEdit, ScrollView } from "std-widgets.slint";
 
-export component GenetekaCoJestWindow inherits Window {
-    no-frame: true;
-    background: transparent;
+
+export component GenetekaCoJestWindow inherits WindowShell {
     preferred-width: 600px;
     preferred-height: 800px;
+    window-title: "GENETEKA - CO JEST?";
+
     
-    // Callbacks dla Rusta
-    callback quit();
-    callback minimize();
-    callback window_resize(string);
-    callback window_move(length, length);
+    // Właściwości i callbacki dla Rusta
     callback search(string);
     in-out property <[string]> search_results: [];
-    WindowShell {
-        window-title: "GENETEKA - CO JEST?";
-        window-move(dx, dy) => {
-            root.window_move(dx, dy);
-        }
-        window-resize(dir) => {
-            root.window_resize(dir);
-        }
-        
-        // Łączymy ramę z oknem
-        close-clicked => {
-            root.quit();
-        }
-        minimize-clicked => {
-            root.minimize();
-        }
-        VerticalLayout {
-            padding: 20px;
-            spacing: 15px;
-            HorizontalLayout {
-                spacing: 10px;
-                height: 40px;
-                input := LineEdit {
-                    placeholder-text: "Szukaj parafii...";
-                    // Naprawiony callback:
-                    accepted => {
-                        root.search(self.text);
-                    }
-                }
-
-                CustomBtn {
-                    text: "SZUKAJ";
-                    width: 100px;
-                    primary: true;
-                    clicked => {
-                        root.search(input.text);
-                    }
+    VerticalLayout {
+        padding: 20px;
+        spacing: 15px;
+        HorizontalLayout {
+            spacing: 10px;
+            height: 40px;
+            input := LineEdit {
+                placeholder-text: "Szukaj parafii...";
+                accepted => {
+                    root.search(self.text);
                 }
             }
 
-            Rectangle {
-                background: Palette.background-light;
-                border-radius: 4px;
-                vertical-stretch: 1;
-                clip: true;
-                ScrollView {
-                    viewport-width: self.width;
-                    VerticalLayout {
-                        padding: 10px;
-                        spacing: 5px;
-                        for res in root.search_results: Text {
-                            text: res;
-                            color: Palette.accent-success;
-                            font-family: "Fira Code";
-                        }
+            CustomBtn {
+                text: "SZUKAJ";
+                width: 100px;
+                primary: true;
+                clicked => {
+                    root.search(input.text);
+                }
+            }
+        }
+
+        Rectangle {
+            background: Palette.background-light;
+            border-radius: 4px;
+            vertical-stretch: 1;
+            clip: true;
+            ScrollView {
+                viewport-width: self.width;
+                VerticalLayout {
+                    padding: 10px;
+                    spacing: 5px;
+                    for res in root.search_results: Text {
+                        text: res;
+                        color: Palette.accent-success;
+                        font-family: "Fira Code";
                     }
                 }
             }

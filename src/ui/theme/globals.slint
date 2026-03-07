@@ -3,6 +3,12 @@ export global Palette {
     // Inne pliki mogą go zmieniać (Palette.is-dark = !Palette.is-dark)
     in-out property <bool> is-dark: true;
 
+    // window
+    out property <brush> window-backgr-box: is-dark ? #1c1c1c : #f0f0f0;
+    out property <brush> window-border-box: is-dark ? #00ff00 : #026702;
+    out property <brush> window-backgr-bar: is-dark ? #333333 : #dddddd;
+    out property <brush> window-text-main: is-dark ? #ffffff : #1e1e1e;
+
     // --- KOLORY TŁA ---
     out property <brush> background: is-dark ? #1c1c1c : #f0f0f0;
     out property <brush> background-light: is-dark ? #2d2d2d : #ffffff;
