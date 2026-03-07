@@ -3,6 +3,7 @@ use geojson::{GeoJson, Value};
 use crate::geneteka::data_raw_modele::Rekord;
 use super::modele::{MapProcessedData, MapProjection, NormalizedPoint};
 use super::projekcje::{proj_dynamiczna, proj_plate_carree};
+use crate::pliki::path_data_naturalearth as paths;
 
 pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapProcessedData {
     let (min_lon, max_lon, min_lat, max_lat) = match projection {
@@ -17,8 +18,11 @@ pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapPr
     
     // FAST-FALL: Używamy Twoich dokładnych nazw z rozszerzeniem .geojson
     let sciezki_geo = [
-        "data-naturalearth/Vector-Physical/ne_110m_coastline.geojson",
-        "data-naturalearth/Vector-Physical/ne__ramka.geojson"
+        paths::PATH_COASTLINE_110M,
+        paths::PATH_GLACIERS_110M,
+        paths::PATH_LAKES_110M,
+        paths::PATH_RIVERS_LAKE_CENTER_50M,
+        paths::PATH_RAMKA,
     ];
     
     for sciezka in sciezki_geo {
