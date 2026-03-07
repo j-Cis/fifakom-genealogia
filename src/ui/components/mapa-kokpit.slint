@@ -33,6 +33,8 @@ export component MapaCelownik inherits Rectangle {
     // Współrzędne przesyłane z góry
     in property <string> n_coord: "0.0000°";
     in property <string> e_coord: "0.0000°";
+    in property <string> zoom_str: "1.0x";
+    in property <string> rot_str: "0°";
     
     // Sterowniki pozycji dla licznika
     in property <string> anchor: "ne"; // Domyślnie Top-Right
@@ -65,10 +67,10 @@ export component MapaCelownik inherits Rectangle {
         coords_layout := VerticalLayout {
             padding: 5px;
             Text {
-                text: "N: " + root.n_coord + " | E: " + root.e_coord;
+                text: root.n_coord + " | " + root.e_coord + " | R: " + root.rot_str + " | Z: " + root.zoom_str;
                 color: Palette.accent-success;
                 font-family: "Fira Code";
-                font-size: 12px;
+                font-size: 14px;
             }
         }
     }

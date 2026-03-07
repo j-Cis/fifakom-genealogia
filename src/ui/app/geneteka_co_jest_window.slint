@@ -40,7 +40,10 @@ export component GenetekaCoJestWindow inherits WindowShell {
         let orig_y = pivot_y + dx * sin_a + dy * cos_a;
         let ratio = orig_y / (kanwa.height * kanwa.map_zoom);
         let val = geo_max_lat - (ratio * (geo_max_lat - geo_min_lat));
-        return Math.round(val * 10000) / 10000 + "°";
+        // ZMIANA: Obsługa N / S
+        let prefix = val >= 0 ? "N:" : "S:";
+        let val_abs = Math.abs(val);
+        return prefix + " " + Math.round(val_abs * 10000) / 10000 + "°";
     }
     pure function current_lon() -> string {
         let view_center_x = kanwa.width / 2;
@@ -56,10 +59,23 @@ export component GenetekaCoJestWindow inherits WindowShell {
         let orig_x = pivot_x + dx * cos_a - dy * sin_a;
         let ratio = orig_x / (kanwa.width * kanwa.map_zoom);
         let val = geo_min_lon + (ratio * (geo_max_lon - geo_min_lon));
-        return Math.round(val * 10000) / 10000 + "°";
+        // ZMIANA: Obsługa E / W
+        let prefix = val >= 0 ? "E:" : "W:";
+        let val_abs = Math.abs(val);
+        return prefix + " " + Math.round(val_abs * 10000) / 10000 + "°";
     }
     // ==========================================
 
+    // DODANE: Czyste funkcje do formatowania obrotu i zooma
+    pure function current_rot() -> string {
+        let deg = Math.mod(kanwa.map_rotation / 1deg, 360);
+        let final_deg = deg < 0 ? deg + 360 : deg; // Zawijanie na 360
+        return Math.round(final_deg) + "°";
+    }
+    pure function current_zoom() -> string {
+        // Pokazujemy 2 miejsca po przecinku dla ułamkowych powiększeń
+        return (Math.round(kanwa.map_zoom * 100) / 100) + "x";
+    }
     VerticalLayout {
         padding: 20px;
         spacing: 15px;
@@ -95,6 +111,8 @@ export component GenetekaCoJestWindow inherits WindowShell {
                 height: 100%;
                 n_coord: root.current_lat();
                 e_coord: root.current_lon();
+                zoom_str: root.current_zoom(); // Pociągnięte z nowej funkcji
+                rot_str: root.current_rot();   // Pociągnięte z nowej funkcji
                 anchor: "ne"; // Licznik w prawym górnym rogu
             }
 
@@ -105,10 +123,12 @@ export component GenetekaCoJestWindow inherits WindowShell {
                 x: (self.anchor == "nw" || self.anchor == "sw") ? self.margin : parent.width - self.preferred-width - self.margin;
                 y: (self.anchor == "nw" || self.anchor == "ne") ? self.margin : parent.height - self.preferred-height - self.margin;
                 zoom_in => {
-                    kanwa.zoom_around_center(kanwa.map_zoom + 0.75);
+                    // kanwa.zoom_around_center(kanwa.map_zoom + 0.75);
+                    kanwa.zoom_around_center(kanwa.map_zoom * 1.15);
                 }
                 zoom_out => {
-                    kanwa.zoom_around_center(kanwa.map_zoom - 0.75);
+                    // kanwa.zoom_around_center(kanwa.map_zoom - 0.75);
+                    kanwa.zoom_around_center(kanwa.map_zoom / 1.15);
                 }
                 rotate_ccw => {
                     kanwa.rotate_view(-5deg);
