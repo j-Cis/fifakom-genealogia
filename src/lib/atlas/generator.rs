@@ -5,8 +5,8 @@ use super::projekcje::{proj_dynamiczna, proj_plate_carree};
 pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapProcessedData {
     // 1. Ustalenie granic przez wybrany silnik projekcji
     let (min_lon, max_lon, min_lat, max_lat) = match projection {
-        MapProjection::PlateCarree => proj_plate_carree::get_bounds(),
-        MapProjection::Dynamic { margin } => proj_dynamiczna::get_bounds(records, margin),
+        MapProjection::ProjWgs84 => proj_plate_carree::get_bounds(),
+        MapProjection::ProjDynamic { margin } => proj_dynamiczna::get_bounds(records, margin),
     };
 
     let lon_range = max_lon - min_lon;

@@ -9,3 +9,6 @@ Cargo.lock
 /src/ui/fonts/code/*
 !/src/ui/fonts/code/BlexMonoNerdFont-Bold.ttf
 
+/data-naturalearth/Vector-Physical/_info/
+/data-naturalearth/Vector-Physical/_raw/
+

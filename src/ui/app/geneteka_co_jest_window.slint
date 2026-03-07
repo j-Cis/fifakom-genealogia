@@ -12,7 +12,9 @@ export component GenetekaCoJestWindow inherits WindowShell {
     preferred-height: 1000px;
     window-title: "GENETEKA - CO JEST?";
     callback search(string);
-    in property <[MapPoint]> map_points: [];
+    //in property <[MapPoint]> map_points: [];
+    in property <image> map_frame;
+    callback camera_changed(float, float, float, float, float, float);
     in-out property <[string]> search_results: [];
 
     // ==========================================
@@ -82,7 +84,10 @@ export component GenetekaCoJestWindow inherits WindowShell {
         }
 
         kanwa := MapaKanwa {
-            map_points: root.map_points;
+            map_frame: root.map_frame;
+            camera_changed(w, h, ox, oy, z, rot) => {
+                root.camera_changed(w, h, ox, oy, z, rot);
+            }
 
             // 1. CELOWNIK I LICZNIK (Warstwa informacyjna)
             MapaCelownik {
@@ -120,6 +125,7 @@ export component GenetekaCoJestWindow inherits WindowShell {
                     kanwa.map_offset_x = 0px;
                     kanwa.map_offset_y = 0px;
                     kanwa.map_rotation = 0deg;
+                    kanwa.trigger_render();
                 }
             }
         }

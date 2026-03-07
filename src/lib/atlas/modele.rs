@@ -1,7 +1,7 @@
 #[derive(Debug, Clone, Copy)]
 pub enum MapProjection {
-    Dynamic { margin: f64 },
-    PlateCarree,
+    ProjDynamic { margin: f64 },
+    ProjWgs84,
     // W przyszłości:
     // Dymaxion,
     // AuthaGraph,

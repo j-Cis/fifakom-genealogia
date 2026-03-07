@@ -3,7 +3,7 @@
 use anyhow::Result;
 
 use std::rc::Rc;
-use slint::{ComponentHandle,  VecModel};
+use slint::ComponentHandle; // UWAGA: Usunąłem stąd VecModel, bo już go nie używamy!
 
 use fifak_lib::window; 
 use fifak_lib::setup_window_ctrl_bindings;
@@ -25,26 +25,16 @@ fn main() -> Result<()> {
     let ui= GenetekaCoJestWindow::new()?;
     setup_window_ctrl_bindings!(ui);
 
-
     // ==========================================
     // LOGIKA MAPY -> przeniesiona do biblioteki atlas!
-    // Wywołujemy z parametrem "Dynamic"
+    // Generujemy dane i od razu pakujemy w Rc, by były dostępne dla silnika rysującego
+    //
+    // ODKOMENTUJ TO, jeśli chcesz wrócić do dynamicznych marginesów:
+    // let map_data = Rc::new(generate_map_data(&baza.rekord, MapProjection::Dynamic { margin: 0.05 }));
+    //
+    // ZOSTAW TO, jeśli używamy mapy całego świata:
+    let map_data = Rc::new(generate_map_data(&baza.rekord, MapProjection::ProjWgs84));
     // ==========================================
-    //let map_data = generate_map_data(&baza.rekord, MapProjection::Dynamic { margin: 0.05 });
-    let map_data = generate_map_data(&baza.rekord, MapProjection::PlateCarree);
-    // Tłumaczymy niezależne punkty z modułu Atlas na typy rozumiane przez Slint (MapPoint)
-    let mut slint_points = Vec::with_capacity(map_data.points.len());
-    for pt in map_data.points {
-        slint_points.push(MapPoint {
-            x: pt.x,
-            y: pt.y,
-            nazwa: pt.name.into(),
-        });
-    }
-
-    // Wypychamy wyliczone punkty prosto na front-end do Slinta
-    let points_model = Rc::new(VecModel::from(slint_points));
-    ui.set_map_points(points_model.into());
 
     // ------------------ TRANSFER GRANIC DO SLINTA ------------------
     ui.set_geo_min_lon(map_data.min_lon as f32);
@@ -52,6 +42,27 @@ fn main() -> Result<()> {
     ui.set_geo_min_lat(map_data.min_lat as f32);
     ui.set_geo_max_lat(map_data.max_lat as f32);
     // ---------------------------------------------------------------
+
+    // ==========================================
+    // NOWOŚĆ: SILNIK RENDERUJĄCY W RUŚCIE (TINY-SKIA)
+    // To zastępuje całkowicie pętlę "for pt in map_data.points..."
+    // ==========================================
+    let ui_handle = ui.as_weak();
+    let map_data_render = Rc::clone(&map_data); // Klonujemy referencję dla closure
+    
+    ui.on_camera_changed(move |w, h, offset_x, offset_y, zoom, _rot| {
+        if let Some(ui_ref) = ui_handle.upgrade() {
+            // Rust błyskawicznie rysuje płótno na podstawie widoku z kamery:
+            let image_frame = fifak_lib::atlas::renderer::render_frame(
+                w as u32, h as u32, 
+                &map_data_render, 
+                offset_x, offset_y, zoom
+            );
+            // I wysyła jedną gotową, lekką klatkę do Slinta:
+            ui_ref.set_map_frame(image_frame);
+        }
+    });
+    // ==========================================
 
     ui.on_search(|text| {
         println!("[*] Szukamy: {}", text);

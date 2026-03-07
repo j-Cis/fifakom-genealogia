@@ -1,5 +1,6 @@
 import { Palette } from "../theme/globals.slint";
 
+// Zostawiamy strukturę, żeby nie zepsuć importów w geneteka_co_jest_window.slint
 export struct MapPoint {
     x: float,
     y: float,
@@ -7,117 +8,119 @@ export struct MapPoint {
 }
 
 export component MapaKanwa inherits Rectangle {
-    in property <[MapPoint]> map_points: [];
+    // NASZ NOWY EKRAN Z RUSTA
+    in property <image> map_frame;
     in-out property <float> map_zoom: 1.0;
     in-out property <length> map_offset_x: 0px;
     in-out property <length> map_offset_y: 0px;
     
-    // Zmienna kąta i automatyczna, płynna animacja!
+    // PRZYWRÓCONE: Zmienna obrotu
     in-out property <angle> map_rotation: 0deg;
-    animate map_rotation {
-        duration: 250ms;
-        easing: ease-in-out;
-    }
+
+    // Zmieniony sygnał dla Rusta (dodaliśmy kąt obrotu na samym końcu!)
+    // parametry: width, height, offset_x, offset_y, zoom, rotation
+    callback camera_changed(float, float, float, float, float, float);
     horizontal-stretch: 1;
     background: Palette.background-light;
     border-radius: 4px;
     border-width: 1px;
     border-color: Palette.accent-success;
     clip: true;
+    public function trigger_render() {
+        root.camera_changed(
+            root.width / 1px, root.height / 1px,
+            root.map_offset_x / 1px, root.map_offset_y / 1px,
+            root.map_zoom,
+            root.map_rotation / 1deg // Wysyłamy kąt w stopniach do Rusta
+        );
+    }
 
-    // Funkcja powiększająca
+    // PRZYWRÓCONE I POPRAWIONE: Funkcja obrotu
+    public function rotate_view(d_angle: angle) {
+        let old_angle = root.map_rotation;
+        let view_center_x = root.width / 2;
+        let view_center_y = root.height / 2;
+        let target_x = view_center_x - root.map_offset_x;
+        let target_y = view_center_y - root.map_offset_y;
+
+        // UWAGA: Używamy teraz root.width zamiast map_layer.width
+        let pivot_x = (root.width * root.map_zoom) / 2;
+        let pivot_y = (root.height * root.map_zoom) / 2;
+        let dx = target_x - pivot_x;
+        let dy = target_y - pivot_y;
+        let unrot_cos = Math.cos(-old_angle);
+        let unrot_sin = Math.sin(-old_angle);
+        let orig_dx = dx * unrot_cos - dy * unrot_sin;
+        let orig_dy = dx * unrot_sin + dy * unrot_cos;
+        root.map_rotation += d_angle;
+        let new_cos = Math.cos(root.map_rotation);
+        let new_sin = Math.sin(root.map_rotation);
+        let new_dx = orig_dx * new_cos - orig_dy * new_sin;
+        let new_dy = orig_dx * new_sin + orig_dy * new_cos;
+        let new_target_x = pivot_x + new_dx;
+        let new_target_y = pivot_y + new_dy;
+        root.map_offset_x = view_center_x - new_target_x;
+        root.map_offset_y = view_center_y - new_target_y;
+        root.trigger_render(); // Wymuszamy nową klatkę po obrocie!
+    }
     public function zoom_around_center(new_zoom: float) {
         if (new_zoom <= 0) {
             return;
         }
         let old_zoom = root.map_zoom;
-        let old_w = flick.width;
-        let old_h = flick.height;
+        let old_w = root.width;
+        let old_h = root.height;
         let old_offset_x = root.map_offset_x;
         let old_offset_y = root.map_offset_y;
         let visual_center_x = old_w / 2;
         let visual_center_y = old_h / 2;
-        let old_center_inner_x = visual_center_x - old_offset_x;
-        let old_center_inner_y = visual_center_y - old_offset_y;
         let s = new_zoom / old_zoom;
-        let new_center_inner_x = old_center_inner_x * s;
-        let new_center_inner_y = old_center_inner_y * s;
+        let new_center_inner_x = (visual_center_x - old_offset_x) * s;
+        let new_center_inner_y = (visual_center_y - old_offset_y) * s;
         root.map_zoom = new_zoom;
         root.map_offset_x = visual_center_x - new_center_inner_x;
         root.map_offset_y = visual_center_y - new_center_inner_y;
+        root.trigger_render(); // Wymuszamy nową klatkę po zoomie!
     }
-    // --- NOWA FUNKCJA DO OBROTU WZDŁUŻ CELOWNIKA ---
-    public function rotate_view(d_angle: angle) {
-        // Zapisujemy stary kąt
-        let old_angle = root.map_rotation;
-        
-        // 1. Gdzie jest środek okna (celownik)?
-        let view_center_x = flick.width / 2;
-        let view_center_y = flick.height / 2;
-        
-        // 2. Gdzie na płótnie jest punkt, który aktualnie jest pod celownikiem?
-        let target_x = view_center_x - root.map_offset_x;
-        let target_y = view_center_y - root.map_offset_y;
-
-        // 3. Względem czego obracamy całą mapę? (środek płótna)
-        let pivot_x = map_layer.width / 2;
-        let pivot_y = map_layer.height / 2;
-
-        // Odległość naszego celu od środka płótna
-        let dx = target_x - pivot_x;
-        let dy = target_y - pivot_y;
-
-        // Obracamy nasz wektor (dx, dy) wstecz o stary kąt...
-        let unrot_cos = Math.cos(-old_angle);
-        let unrot_sin = Math.sin(-old_angle);
-        let orig_dx = dx * unrot_cos - dy * unrot_sin;
-        let orig_dy = dx * unrot_sin + dy * unrot_cos;
-
-        // Zmieniamy główny kąt mapy
-        root.map_rotation += d_angle;
-
-        // ...i obracamy wektor w przód o nowy kąt
-        let new_cos = Math.cos(root.map_rotation);
-        let new_sin = Math.sin(root.map_rotation);
-        let new_dx = orig_dx * new_cos - orig_dy * new_sin;
-        let new_dy = orig_dx * new_sin + orig_dy * new_cos;
-
-        // Obliczamy nową pozycję celu na płótnie
-        let new_target_x = pivot_x + new_dx;
-        let new_target_y = pivot_y + new_dy;
-
-        // 4. Korygujemy offset, żeby nowy target był znów na środku okna!
-        root.map_offset_x = view_center_x - new_target_x;
-        root.map_offset_y = view_center_y - new_target_y;
-    }
-    flick := Flickable {
+    TouchArea {
         width: 100%;
         height: 100%;
-        interactive: true;
-        viewport-x <=> root.map_offset_x;
-        viewport-y <=> root.map_offset_y;
-        viewport-width: map_layer.width;
-        viewport-height: map_layer.height;
-        map_layer := Rectangle {
-            width: flick.width * root.map_zoom;
-            height: flick.height * root.map_zoom;
-            for pt in root.map_points: Rectangle {
-                // Matematyka obrotu 2D
-                property <length> cx: parent.width / 2;
-                property <length> cy: parent.height / 2;
-                property <length> px: pt.x * parent.width;
-                property <length> py: pt.y * parent.height;
-                property <float> cos_a: Math.cos(root.map_rotation);
-                property <float> sin_a: Math.sin(root.map_rotation);
-                x: self.cx + (self.px - self.cx) * self.cos_a - (self.py - self.cy) * self.sin_a - 2px;
-                y: self.cy + (self.px - self.cx) * self.sin_a + (self.py - self.cy) * self.cos_a - 2px;
-                width: 4px;
-                height: 4px;
-                background: #ff0055;
-                border-radius: 2px;
+        property <length> start_x;
+        property <length> start_y;
+        pointer-event(event) => {
+            if (event.kind == PointerEventKind.down) {
+                self.start_x = root.map_offset_x;
+                self.start_y = root.map_offset_y;
             }
+        }
+        moved => {
+            root.map_offset_x = self.start_x + (self.mouse-x - self.pressed-x);
+            root.map_offset_y = self.start_y + (self.mouse-y - self.pressed-y);
+            root.trigger_render(); // Wymuszamy nową klatkę podczas przesuwania!
+        }
+        scroll-event(event) => {
+            if (event.delta-y > 0px) {
+                root.zoom_around_center(root.map_zoom - 0.2);
+            }
+            if (event.delta-y < 0px) {
+                root.zoom_around_center(root.map_zoom + 0.2);
+            }
+            return accept;
         }
     }
 
+    Image {
+        width: 100%;
+        height: 100%;
+        source: root.map_frame;
+        image-fit: fill;
+    }
+
+    changed width => {
+        root.trigger_render();
+    }
+    changed height => {
+        root.trigger_render();
+    }
     @children
 }
