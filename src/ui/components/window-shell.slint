@@ -1,5 +1,9 @@
 import { Palette } from "../theme/globals.slint";
 import { ResizeBorders } from "resize-borders.slint";
+import "../fonts/BlexMonoNerdFont-Bold.ttf";
+import "../fonts/RammettoOne-Regular.ttf";
+// kody ikon są SPECIFICZNE dla Nerd Fonts i na 100% są w pliku BlexMono
+// https://www.nerdfonts.com/cheat-sheet
 
 export component CustomBtn {
     in property <string> text;
@@ -20,6 +24,7 @@ export component CustomBtn {
             font-weight: 700;
             vertical-alignment: center;
             horizontal-alignment: center;
+            font-family: "BlexMono Nerd Font";
         }
 
         ta := TouchArea {
@@ -88,7 +93,7 @@ export component WindowShell inherits Window {
                     }
 
                     CustomBtn {
-                        text: "X";
+                        text: "\u{f00d}";
                         //✕
                         width: 35px;
                         height: 35px;
