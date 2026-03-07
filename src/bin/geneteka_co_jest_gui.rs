@@ -50,13 +50,17 @@ fn main() -> Result<()> {
     let ui_handle = ui.as_weak();
     let map_data_render = Rc::clone(&map_data); // Klonujemy referencję dla closure
     
-    ui.on_camera_changed(move |w, h, offset_x, offset_y, zoom, _rot| {
+    ui.on_camera_changed(move |w, h, offset_x, offset_y, zoom, rot| {
         if let Some(ui_ref) = ui_handle.upgrade() {
             // Rust błyskawicznie rysuje płótno na podstawie widoku z kamery:
             let image_frame = fifak_lib::atlas::renderer::render_frame(
-                w as u32, h as u32, 
+                w as u32, 
+                h as u32, 
                 &map_data_render, 
-                offset_x, offset_y, zoom
+                offset_x, 
+                offset_y, 
+                zoom,
+                rot
             );
             // I wysyła jedną gotową, lekką klatkę do Slinta:
             ui_ref.set_map_frame(image_frame);

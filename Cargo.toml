@@ -41,6 +41,7 @@ roxmltree = "0.21.1"    # Ultraszybki parser drzewa XML – używany do czytania
 scraper = "0.25.0"      # Parser HTML z obsługą selektorów CSS (wyciąganie danych prosto z tabel na stronie WWW)
 toml = "1.0.6"
 tiny-skia = "0.12.0"
+geojson = "0.24.2"
 
 # ZALEŻNOŚCI BUDOWANIA (Używane TYLKO przez plik build.rs przed główną kompilacją)
 [build-dependencies]

@@ -15,6 +15,7 @@ pub struct NormalizedPoint {
 
 pub struct MapProcessedData {
     pub points: Vec<NormalizedPoint>,
+    pub coastlines: Vec<Vec<(f32, f32)>>,
     pub min_lon: f64,
     pub max_lon: f64,
     pub min_lat: f64,
