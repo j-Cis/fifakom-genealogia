@@ -7,8 +7,8 @@ import {
 import { LineEdit, ScrollView } from "std-widgets.slint";
 
 export struct MapPoint {
-    x: length,
-    y: length,
+    x: float, // Zmiana na float! (procent szerokości 0.0-1.0) x: length,
+    y: float, // Zmiana na float! (procent wysokości 0.0-1.0) y: length,
     nazwa: string,
 }
 
@@ -24,6 +24,7 @@ export component GenetekaCoJestWindow inherits WindowShell {
     in property <length> map_canvas_width: 700px;
     in property <length> map_canvas_height: 600px;
     in-out property <[string]> search_results: [];
+    in-out property <float> map_zoom: 1.0;
     VerticalLayout {
         padding: 20px;
         spacing: 15px;
@@ -54,30 +55,78 @@ export component GenetekaCoJestWindow inherits WindowShell {
             clip: true;
 
             // --- NASZA MAPA ---
-        Rectangle {
-                height: root.map_canvas_height;
-            // Używamy stretch, żeby mapa ładnie wypełniała szerokość, 
-            // a nie wystawała sztywno na 700px
-            horizontal-stretch: 1;
+            Rectangle {
+                //height: root.map_canvas_height;
+                horizontal-stretch: 1;
                 background: Palette.background-light;
                 border-radius: 4px;
                 border-width: 1px;
                 border-color: Palette.accent-success;
                 clip: true;
-                for pt in root.map_points: Rectangle {
-                // Odejmujemy 2px, żeby środek kropki był dokładnie na koordynatach
-                x: pt.x - 2px;
-                    y: pt.y - 2px;
-                    width: 4px;
-                    height: 4px;
-                    background: #ff0055; // Wyraźny czerwony/różowy kolor pinezki
-                border-radius: 2px;
-                
-                // Opcjonalnie: podpowiedź po najechaniu myszką
-                // tooltip: pt.nazwa; (Slint wspiera proste tooltipy, ale to na później)
-            }
-            }
+                flick := Flickable {
+                    width: 100%;
+                    height: 100%;
+                    viewport-width: map_layer.width;      //viewport-width: self.width * root.map_zoom;
+                    viewport-height: map_layer.height;    //viewport-height: self.height * root.map_zoom;
+                    
+                    map_layer := Rectangle {
+                        // Rozmiar wirtualnego płótna rośnie wraz z zoomem
+                        width: flick.width * root.map_zoom;
+                        height: flick.height * root.map_zoom;
+                        for pt in root.map_points: Rectangle {
+                            // parent to teraz jednoznacznie `map_layer`
+                            x: pt.x * parent.width - 2px;
+                            y: pt.y * parent.height - 2px;
+                            width: 4px;
+                            height: 4px;
+                            background: #ff0055;
+                            border-radius: 2px;
+                        }
+                    }
+                }
 
+                HorizontalLayout {
+                    x: parent.width - self.width - 10px;
+                    y: 10px;
+                    spacing: 5px;
+                    CustomBtn {
+                        text: "－";
+                        width: 30px;
+                        height: 30px;
+                        clicked => {
+                            root.map_zoom = Math.max(1.0, root.map_zoom - 0.5);
+                        }
+                    }
+
+                    CustomBtn {
+                        text: "O";
+                        width: 30px;
+                        height: 30px;
+                        clicked => {
+                            root.map_zoom = 1.0;
+                        }
+                    }
+
+                    CustomBtn {
+                        text: "＋";
+                        width: 30px;
+                        height: 30px;
+                        clicked => {
+                            root.map_zoom += 0.5;
+                        }
+                    }
+                }
+                    
+                    // Opcjonalnie: podpowiedź po najechaniu myszką
+                    // tooltip: pt.nazwa; (Slint wspiera proste tooltipy, ale to na później)
+            }
+        }
+
+        Rectangle {
+            background: Palette.background-light;
+            border-radius: 4px;
+            vertical-stretch: 1;
+            clip: true;
             ScrollView {
                 viewport-width: self.width;
                 VerticalLayout {

@@ -27,8 +27,8 @@ fn main() -> Result<()> {
 
     // --- LOGIKA MAPY ---
     // Pobieramy rozmiar płótna ze Slinta (ustawiłeś domyślnie na 700x600)
-    let canvas_w = ui.get_map_canvas_width();
-    let canvas_h = ui.get_map_canvas_height();
+    // let canvas_w = ui.get_map_canvas_width();
+    // let canvas_h = ui.get_map_canvas_height();
 
     // Szukamy skrajnych punktów (bounding box) żeby mapa idealnie się wpasowała
     let mut min_lon = f64::MAX;
@@ -65,13 +65,9 @@ fn main() -> Result<()> {
             let x_norm = if lon_range > 0.0 { (lon - lon_offset) / lon_range } else { 0.5 };
             let y_norm = if lat_range > 0.0 { (lat - lat_offset) / lat_range } else { 0.5 };
 
-            // Oś Y na ekranie rośnie w dół, więc ją odwracamy (1.0 - y_norm)
-            let x = x_norm as f32 * canvas_w;
-            let y = (1.0 - y_norm as f32) * canvas_h;
-
             punkty.push(MapPoint {
-                x,
-                y,
+                x: x_norm as f32,
+                y: (1.0 - y_norm) as f32, // Odwrócona oś Y
                 nazwa: nazwa.into(),
             });
         }
