@@ -1,0 +1,121 @@
+import { Palette } from "../theme/globals.slint";
+
+component ShapeBtn inherits Rectangle {
+    in property <string> icon_commands;
+    in property <bool> is_filled: false;
+    callback clicked();
+    width: 35px;
+    height: 35px;
+    // POPRAWKA: Używamy .brighter() zamiast .lighter()
+    background: ta.pressed ? Palette.accent-success.darker(0.2) : (ta.has-hover ? Palette.background-light.brighter(0.1) : Palette.background-light);
+    border-radius: 4px;
+    border-width: 1px;
+    border-color: Palette.accent-success;
+    Path {
+        width: 24px;
+        height: 24px;
+        x: (parent.width - self.width) / 2;
+        y: (parent.height - self.height) / 2;
+        commands: root.icon_commands;
+        stroke: root.is_filled ? transparent : Palette.text-primary;
+        fill: root.is_filled ? Palette.text-primary : transparent;
+        stroke-width: root.is_filled ? 0px : 2px;
+    }
+
+    ta := TouchArea {
+        clicked => {
+            root.clicked();
+        }
+    }
+}
+
+export component MapaKokpit inherits GridLayout {
+    padding: 0px;
+    spacing: 5px;
+    
+    // Właściwości konfiguracyjne dla rodzica
+    in property <string> anchor: "sw";
+    in property <length> margin: 10px; 
+
+    // (Linie z 'x' i 'y' usunięte - rodzic zajmie się pozycjonowaniem)
+
+    callback zoom_in();
+    callback zoom_out();
+    callback pan(length, length);
+    callback reset();
+
+    // Wiersz 1
+    Row {
+        ShapeBtn {
+            icon_commands: "M 10 5 L 12 5 L 12 10 L 17 10 L 17 12 L 12 12 L 12 17 L 10 17 L 10 12 L 5 12 L 5 10 L 10 10 Z";
+            is_filled: true;
+            clicked => {
+                root.zoom_in();
+            }
+        }
+
+        ShapeBtn {
+            icon_commands: "M 11 6 L 17 14 L 5 14 Z";
+            is_filled: true;
+            clicked => {
+                root.pan(0px, 100px);
+            }
+        }
+
+        ShapeBtn {
+            icon_commands: "M 5 12 L 17 12 L 17 10 L 5 10 Z";
+            is_filled: true;
+            clicked => {
+                root.zoom_out();
+            }
+        }
+    }
+    // Wiersz 2
+    Row {
+        ShapeBtn {
+            icon_commands: "M 6 12 L 14 6 L 14 18 Z";
+            is_filled: true;
+            clicked => {
+                root.pan(100px, 0px);
+            }
+        }
+
+        ShapeBtn {
+            icon_commands: "M 11 18 L 17 10 L 5 10 Z";
+            is_filled: true;
+            clicked => {
+                root.pan(0px, -100px);
+            }
+        }
+
+        ShapeBtn {
+            icon_commands: "M 16 12 L 8 6 L 8 18 Z";
+            is_filled: true;
+            clicked => {
+                root.pan(-100px, 0px);
+            }
+        }
+    }
+    // Wiersz 3
+    Row {
+        // Obrót w lewo CCW
+        ShapeBtn {
+            icon_commands: "M11,1 L5,6 L11,11 L11,8 A4,4 0 1,1 7,12 L3,12 A8,8 0 1,0 11,4 Z";
+            is_filled: true;
+        }
+
+        ShapeBtn {
+            icon_commands: "M 6 6 L 17 6 L 17 17 L 6 17 Z";
+            is_filled: true;
+            clicked => {
+                root.reset();
+            }
+        }
+
+        // Obrót w prawo CW
+        ShapeBtn {
+            icon_commands: "M11,1 L17,6 L11,11 L11,8 A4,4 0 1,0 15,12 L19,12 A8,8 0 1,1 11,4 Z";
+            is_filled: true;
+        }
+    }
+}
