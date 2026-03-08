@@ -58,11 +58,16 @@ path = "src/lib/mod.rs" # Wskazuje, gdzie znajduje się główne "jądro" Twojej
 
 [[bin]]
 name = "PobieraczGenetekaZakresMapaGET"  
-path = "src/bin/batch/pobieracz_geneteka_zakres_mapa__get.rs"
+path = "src/bin/job/pobieracz_geneteka_zakres_mapa__get.rs"
 
 [[bin]]
 name = "PobieraczGenetekaZakresHtmlGET"  
-path = "src/bin/batch/pobieracz_geneteka_zakres_html__get.rs"
+path = "src/bin/job/pobieracz_geneteka_zakres_html__get.rs"
+
+[[bin]]
+name = "DokumentacjaEXTRACT"  
+path = "src/bin/job/dokumentacja_extract.rs"
+
 [[bin]]
 name = "AppKartezjanProduktCLI"                    
 path = "src/bin/cli/app_kartezjan_produkt__cli.rs" 

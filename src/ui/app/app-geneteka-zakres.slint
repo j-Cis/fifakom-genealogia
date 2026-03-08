@@ -5,6 +5,7 @@ import {
     MapaCelownik,
     MapaLogika,
     MapaWarstwyZiemi,
+    MapaWarstwyDanych,
 } from "../element/mapa.slint";
 import { OknoSzkielet, OknoGuzik } from "../element/okno.slint";
 import { LineEdit } from "std-widgets.slint";
@@ -93,6 +94,16 @@ export component AppGenetekaZakres inherits OknoSzkielet {
             MapaWarstwyZiemi {
                 margin: 10px;
                 x: parent.width - self.width - self.margin;
+                y: parent.height - self.height - self.margin;
+                warstwy_zmienione => {
+                    kanwa.trigger_render();
+                }
+            }
+
+            MapaWarstwyDanych {
+                margin: 10px;
+                // Odsunięte o dodatkowe 40px od prawej krawędzi (35px guzik + 5px odstępu)
+                x: parent.width - self.width - self.margin - 40px;
                 y: parent.height - self.height - self.margin;
                 warstwy_zmienione => {
                     kanwa.trigger_render();
