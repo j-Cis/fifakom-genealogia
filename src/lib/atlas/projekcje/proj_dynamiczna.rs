@@ -10,16 +10,24 @@ pub fn get_bounds(records: &[Rekord], margin: f64) -> (f64, f64, f64, f64) {
         if rek.miejsce.lonlat.len() == 2 {
             let lon = rek.miejsce.lonlat[0];
             let lat = rek.miejsce.lonlat[1];
-            if lon < m_lon { m_lon = lon; }
-            if lon > mx_lon { mx_lon = lon; }
-            if lat < m_lat { m_lat = lat; }
-            if lat > mx_lat { mx_lat = lat; }
+            if lon < m_lon {
+                m_lon = lon;
+            }
+            if lon > mx_lon {
+                mx_lon = lon;
+            }
+            if lat < m_lat {
+                m_lat = lat;
+            }
+            if lat > mx_lat {
+                mx_lat = lat;
+            }
         }
     }
 
     let lon_range = mx_lon - m_lon;
     let lat_range = mx_lat - m_lat;
-    
+
     (
         m_lon - lon_range * margin,
         mx_lon + lon_range * margin,

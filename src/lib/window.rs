@@ -58,7 +58,6 @@ pub fn window_resize(window: &Window, direction: SharedString) {
     });
 }
 
-
 #[macro_export]
 macro_rules! setup_window_ctrl_bindings {
     ($ui:expr, $ui_type:ty) => {

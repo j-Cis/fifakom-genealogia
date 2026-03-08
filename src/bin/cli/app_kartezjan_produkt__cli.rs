@@ -22,7 +22,7 @@ struct Cli {
 fn main() {
     // Od razu parsujemy i generujemy, bez zbędnych matchy
     let cli = Cli::parse();
-    
+
     let names = generate_morphology(&cli.pattern);
     format_result(&names, &cli.format);
 }

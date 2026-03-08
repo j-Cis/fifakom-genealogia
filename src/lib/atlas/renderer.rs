@@ -1,6 +1,6 @@
-use tiny_skia::{Color, Paint, Pixmap, Rect, Transform, PathBuilder, Stroke};
-use slint::{Image, Rgba8Pixel, SharedPixelBuffer};
 use super::modele::MapProcessedData;
+use slint::{Image, Rgba8Pixel, SharedPixelBuffer};
+use tiny_skia::{Color, Paint, PathBuilder, Pixmap, Rect, Stroke, Transform};
 
 pub fn render_frame(
     width: u32,
@@ -11,7 +11,9 @@ pub fn render_frame(
     zoom: f32,
     rotation_deg: f32,
 ) -> Image {
-    if width == 0 || height == 0 { return Image::default(); }
+    if width == 0 || height == 0 {
+        return Image::default();
+    }
 
     let mut pixmap = Pixmap::new(width, height).unwrap();
     // Tło - ustawiam na bardzo ciemny szary, żeby lądy były widoczne
@@ -20,7 +22,7 @@ pub fn render_frame(
     let rot_rad = rotation_deg.to_radians();
     let cos_a = rot_rad.cos();
     let sin_a = rot_rad.sin();
-    
+
     let world_w = width as f32 * zoom;
     let world_h = height as f32 * zoom;
     let pivot_x = world_w / 2.0;
@@ -29,14 +31,19 @@ pub fn render_frame(
     // --- 1. RYSOWANIE LINII BRZEGOWYCH (MAPA BAZOWA) ---
     let mut paint_map = Paint::default();
     // Ustawiam JASKRAWY ZIELONY na moment testu, żebyś widział czy w ogóle coś rysuje
-    paint_map.set_color_rgba8(0, 255, 100, 255); 
+    paint_map.set_color_rgba8(0, 255, 100, 255);
     paint_map.anti_alias = true;
-    let stroke = Stroke { width: 1.0, ..Default::default() };
+    let stroke = Stroke {
+        width: 1.0,
+        ..Default::default()
+    };
 
     for linia in &map_data.coastlines {
-        if linia.is_empty() { continue; }
+        if linia.is_empty() {
+            continue;
+        }
         let mut pb = PathBuilder::new();
-        
+
         for (i, p) in linia.iter().enumerate() {
             // MATEMATYKA IDENTYCZNA JAK DLA KROPEK
             let local_x = p.0 * world_w;
@@ -48,9 +55,13 @@ pub fn render_frame(
             let sx = pivot_x + rot_x + offset_x;
             let sy = pivot_y + rot_y + offset_y;
 
-            if i == 0 { pb.move_to(sx, sy); } else { pb.line_to(sx, sy); }
+            if i == 0 {
+                pb.move_to(sx, sy);
+            } else {
+                pb.line_to(sx, sy);
+            }
         }
-        
+
         if let Some(path) = pb.finish() {
             pixmap.stroke_path(&path, &paint_map, &stroke, Transform::identity(), None);
         }
@@ -70,11 +81,14 @@ pub fn render_frame(
         let rot_y = dx * sin_a + dy * cos_a;
         let sx = pivot_x + rot_x + offset_x;
         let sy = pivot_y + rot_y + offset_y;
-        
-        if sx >= -5.0 && sx <= width as f32 + 5.0 && sy >= -5.0 && sy <= height as f32 + 5.0 {
-            if let Some(rect) = Rect::from_xywh(sx - 2.0, sy - 2.0, 4.0, 4.0) {
-                pixmap.fill_rect(rect, &paint_pt, Transform::identity(), None);
-            }
+
+        if sx >= -5.0
+            && sx <= width as f32 + 5.0
+            && sy >= -5.0
+            && sy <= height as f32 + 5.0
+            && let Some(rect) = Rect::from_xywh(sx - 2.0, sy - 2.0, 4.0, 4.0)
+        {
+            pixmap.fill_rect(rect, &paint_pt, Transform::identity(), None);
         }
     }
 

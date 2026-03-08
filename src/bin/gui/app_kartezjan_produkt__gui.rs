@@ -9,7 +9,7 @@ use slint::{ComponentHandle, Model, ModelRc, SharedString, VecModel};
 slint::include_modules!();
 
 fn main() -> Result<()> {
-    let ui= AppKartezjanProdukt::new()?; 
+    let ui = AppKartezjanProdukt::new()?;
     setup_window_ctrl_bindings!(ui, AppKartezjanProdukt);
 
     // 1. Generowanie
@@ -19,7 +19,7 @@ fn main() -> Result<()> {
             let results = generate_morphology(pattern.as_str());
             let model: Vec<SharedString> = results.iter().map(SharedString::from).collect();
             ui.set_results(ModelRc::new(VecModel::from(model)));
-            
+
             let joined = results.join(", ");
             ui.set_joined_text(SharedString::from(joined));
         }

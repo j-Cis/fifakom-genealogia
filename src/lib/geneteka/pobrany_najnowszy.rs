@@ -18,7 +18,7 @@ pub fn znajdz_najnowsza_mape(folder: &str) -> Option<PathBuf> {
 
     // Domyślne sortowanie alfabetyczne idealnie posortuje daty YYYY_MM_DD rosnąco
     pliki.sort();
-    
+
     // Zdejmujemy i zwracamy ostatni element (najnowszy)
     pliki.pop()
 }
@@ -27,15 +27,15 @@ pub fn znajdz_najnowsza_mape(folder: &str) -> Option<PathBuf> {
 pub fn laduj_baze(folder: &str) -> Option<BazaGeneteki> {
     let sciezka = znajdz_najnowsza_mape(folder)?;
     println!("Znaleziono najnowszą mapę: {:?}", sciezka);
-    
+
     let zawartosc = fs::read_to_string(&sciezka).ok()?;
-    
+
     // Sprawdzamy rozszerzenie, by wiedzieć, jak parsować
     if sciezka.extension().and_then(|e| e.to_str()) == Some("json") {
         // Jeśli będziesz miał JSONy, odkomentuj to i dodaj `serde_json` do Cargo.toml
         // serde_json::from_str(&zawartosc).ok()
         println!("Format JSON nie jest jeszcze w pełni obsługiwany w tym bloku!");
-        None 
+        None
     } else {
         // Deserializacja TOML (Wymaga "toml" w Cargo.toml)
         toml::from_str(&zawartosc).ok()

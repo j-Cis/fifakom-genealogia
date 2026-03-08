@@ -1,9 +1,9 @@
-use std::fs;
-use geojson::{GeoJson, Value};
-use crate::geneteka::data_raw_modele::Rekord;
 use super::modele::{MapProcessedData, MapProjection, NormalizedPoint};
 use super::projekcje::{proj_dynamiczna, proj_plate_carree};
+use crate::geneteka::data_raw_modele::Rekord;
 use crate::pliki::path_data_naturalearth as paths;
+use geojson::{GeoJson, Value};
+use std::fs;
 
 pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapProcessedData {
     let (min_lon, max_lon, min_lat, max_lat) = match projection {
@@ -15,7 +15,7 @@ pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapPr
     let lat_range = max_lat - min_lat;
 
     let mut coastlines = Vec::new();
-    
+
     // FAST-FALL: Używamy Twoich dokładnych nazw z rozszerzeniem .geojson
     let sciezki_geo = [
         paths::PATH_COASTLINE_50M,
@@ -24,20 +24,27 @@ pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapPr
         paths::PATH_RIVERS_LAKE_CENTER_50M,
         paths::PATH_RAMKA,
     ];
-    
+
     for sciezka in sciezki_geo {
         // .expect spowoduje CRASH i poda ścieżkę, jeśli pliku nie ma pod tym adresem
         let data = fs::read_to_string(sciezka)
-            .expect(&format!("KRYTYCZNY BŁĄD: Nie znaleziono pliku: {}", sciezka));
-            
-        let res: GeoJson = data.parse()
-            .expect(&format!("KRYTYCZNY BŁĄD: Plik {} nie jest poprawnym GeoJSONem", sciezka));
-            
+            .unwrap_or_else(|_| panic!("KRYTYCZNY BŁĄD: Nie znaleziono pliku: {}", sciezka));
+
+        let res: GeoJson = data.parse().unwrap_or_else(|_| {
+            panic!(
+                "KRYTYCZNY BŁĄD: Plik {} nie jest poprawnym GeoJSONem",
+                sciezka
+            )
+        });
+
         wyciagnij_linie(&res, &mut coastlines, min_lon, max_lon, min_lat, max_lat);
     }
 
     // Diagnostyka w konsoli
-    println!(">>> GENERATOR: Wczytano {} segmentów mapy bazowej", coastlines.len());
+    println!(
+        ">>> GENERATOR: Wczytano {} segmentów mapy bazowej",
+        coastlines.len()
+    );
 
     let mut points = Vec::new();
     for rek in records {
@@ -62,11 +69,21 @@ pub fn generate_map_data(records: &[Rekord], projection: MapProjection) -> MapPr
     MapProcessedData {
         points,
         coastlines,
-        min_lon, max_lon, min_lat, max_lat,
+        min_lon,
+        max_lon,
+        min_lat,
+        max_lat,
     }
 }
 
-fn wyciagnij_linie(gj: &GeoJson, out: &mut Vec<Vec<(f32, f32)>>, min_lon: f64, max_lon: f64, min_lat: f64, max_lat: f64) {
+fn wyciagnij_linie(
+    gj: &GeoJson,
+    out: &mut Vec<Vec<(f32, f32)>>,
+    min_lon: f64,
+    max_lon: f64,
+    min_lat: f64,
+    max_lat: f64,
+) {
     let lon_range = max_lon - min_lon;
     let lat_range = max_lat - min_lat;
 
@@ -75,30 +92,39 @@ fn wyciagnij_linie(gj: &GeoJson, out: &mut Vec<Vec<(f32, f32)>>, min_lon: f64, m
             if let Some(geom) = &feature.geometry {
                 match &geom.value {
                     Value::LineString(ls) => {
-                        let coords: Vec<(f32, f32)> = ls.iter().map(|p| {
-                            let x = (p[0] - min_lon) / lon_range;
-                            let y = (max_lat - p[1]) / lat_range;
-                            (x as f32, y as f32)
-                        }).collect();
+                        let coords: Vec<(f32, f32)> = ls
+                            .iter()
+                            .map(|p| {
+                                let x = (p[0] - min_lon) / lon_range;
+                                let y = (max_lat - p[1]) / lat_range;
+                                (x as f32, y as f32)
+                            })
+                            .collect();
                         out.push(coords);
                     }
                     Value::MultiLineString(mls) => {
                         for ls in mls {
-                            let coords: Vec<(f32, f32)> = ls.iter().map(|p| {
-                                let x = (p[0] - min_lon) / lon_range;
-                                let y = (max_lat - p[1]) / lat_range;
-                                (x as f32, y as f32)
-                            }).collect();
+                            let coords: Vec<(f32, f32)> = ls
+                                .iter()
+                                .map(|p| {
+                                    let x = (p[0] - min_lon) / lon_range;
+                                    let y = (max_lat - p[1]) / lat_range;
+                                    (x as f32, y as f32)
+                                })
+                                .collect();
                             out.push(coords);
                         }
                     }
                     Value::Polygon(p) => {
                         for ring in p {
-                            let coords: Vec<(f32, f32)> = ring.iter().map(|p| {
-                                let x = (p[0] - min_lon) / lon_range;
-                                let y = (max_lat - p[1]) / lat_range;
-                                (x as f32, y as f32)
-                            }).collect();
+                            let coords: Vec<(f32, f32)> = ring
+                                .iter()
+                                .map(|p| {
+                                    let x = (p[0] - min_lon) / lon_range;
+                                    let y = (max_lat - p[1]) / lat_range;
+                                    (x as f32, y as f32)
+                                })
+                                .collect();
                             out.push(coords);
                         }
                     }
